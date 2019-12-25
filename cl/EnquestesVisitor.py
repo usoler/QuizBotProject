@@ -12,6 +12,7 @@ class EnquestesVisitor(ParseTreeVisitor):
     myGraph = nx.DiGraph()
     actualNode = ''
     dictItems = {}
+    dictAnswers = {}
 
     # Visit a parse tree produced by EnquestesParser#root.
     def visitRoot(self, ctx:EnquestesParser.RootContext):
@@ -23,10 +24,17 @@ class EnquestesVisitor(ParseTreeVisitor):
         for y in l:
             self.visit(y)
         EnquestesVisitor.myGraph.add_node("END")
+        nx.set_node_attributes(EnquestesVisitor.myGraph, EnquestesVisitor.dictAnswers, 'resposta')
+        txtRespuestas = nx.get_node_attributes(EnquestesVisitor.myGraph, 'resposta')
+        print("/////////////////////////////")
+        for x in txtRespuestas:
+            print(txtRespuestas[x])
+        print("/////////////////////////////")
         for z in EnquestesVisitor.myGraph:
             print("Node=" + z)
             succs = EnquestesVisitor.myGraph.successors(z)
             for y in succs:
+                #print("Respuesta=" + txtRespuestas[str(y)])
                 print("Edge=" + y)
                 labels = nx.get_edge_attributes(EnquestesVisitor.myGraph, 'label')
                 print("Label=" + str(labels[(z,y)]))
@@ -84,6 +92,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         for y in range(5, ctx.getChildCount()):
             self.visit(l[y])
         values = nx.get_node_attributes(EnquestesVisitor.myGraph, 'resposta')
+        EnquestesVisitor.dictAnswers[EnquestesVisitor.actualNode] = values[(l[0]).getText()]
         print("options=" + values[(l[0]).getText()])
 
     # Visit a parse tree produced by EnquestesParser#option.
@@ -102,6 +111,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         newValue = values[EnquestesVisitor.actualNode] + '\n' + optionWord
         nx.set_node_attributes(EnquestesVisitor.myGraph, newValue, 'resposta')
         EnquestesVisitor.myGraph.graph[EnquestesVisitor.actualNode] = values[EnquestesVisitor.actualNode] + '\n' + optionWord
+        print("**************" + EnquestesVisitor.myGraph.graph[EnquestesVisitor.actualNode])
 
     # Visit a parse tree produced by EnquestesParser#item.
     def visitItem(self, ctx:EnquestesParser.ItemContext):
@@ -146,4 +156,4 @@ class EnquestesVisitor(ParseTreeVisitor):
             EnquestesVisitor.myGraph.add_edge(parentNode, EnquestesVisitor.dictItems[(l[y]).getText()], label='', color='black')
             parentNode = EnquestesVisitor.dictItems[(l[y]).getText()]
             self.visit(l[y])
-        EnquestesVisitor.myGraph.add_edge(parentNode, "END",label='', color='black')
+        EnquestesVisitor.myGraph.add_edge(parentNode, "END", label='', color='black')
