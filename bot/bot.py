@@ -244,10 +244,19 @@ def processAnswer(bot, update, user_data):
         print("Processing next node")
         nextNode = user_data['data'].pop()
         print("NextNode (down):")
+
         print(nextNode)
 
+        altNode = []
+        while (nextNode[0] == 1):
+            if (nextNode[2] == answer):
+                altNode = nextNode
+            nextNode = user_data['data'].pop()
+        if altNode:
+            (user_data['data']).append(nextNode)
+            nextNode = altNode
 
-        actualNode = nextNode[1] # Considerando ninguna alternativa
+        actualNode = nextNode[1]
         print("ActualNode (down):")
         print(actualNode)
 
@@ -280,7 +289,6 @@ def processAnswer(bot, update, user_data):
                     alternatives.append(v)
 
             for answer in answers:
-                # Tratar respuesta y esperar resultado
                 print("Respuesta: " + answer)
                 txtRespuestas = nx.get_node_attributes(graph, 'resposta')
                 msg = msg + txtRespuestas[answer]
@@ -291,21 +299,16 @@ def processAnswer(bot, update, user_data):
                 print("/////////////////////////////")
                 print("**** " + msg)
 
-            # for alter in alternatives:
-               # Si el resultado de la respuesta es la etiqueta 
-               # de la arista de 'alter', anyade a nodos a procesar
-               # print("Alternativo: " + alter)
-               # txtRespuestas = nx.get_node_attributes(graph, 'resposta')
-               # msg = msg + txtRespuestas[alter]
-               # print(msg)
-               # labels = nx.get_edge_attributes(graph, 'label')
-               # optionValue = str(labels[(actualNode,alter)])
-               # print("Option value=" + optionValue)
-               # greenNode = []
-               # greenNode.append(1)
-               # greenNode.append(msg)
-               # greenNode.append(optionValue)
-               # (user_data['data']).append(greenNode)
+            for alter in alternatives:
+               print("Alternativo: " + alter)
+               labels = nx.get_edge_attributes(graph, 'label')
+               optionValue = str(labels[(actualNode,alter)])
+               print("Option value=" + optionValue)
+               greenNode = []
+               greenNode.append(1)
+               greenNode.append(alter)
+               greenNode.append(optionValue)
+               (user_data['data']).append(greenNode)
 
             user_data['lastNode'] = actualNode
             print(user_data['lastNode'])
