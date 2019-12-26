@@ -136,96 +136,6 @@ def initInterpreter(idEnquesta, graph, bot, update, user_data):
     
     bot.send_message(chat_id=update.message.chat_id, text=msg)
 
-def executeInterpreter(idEnquesta, graph, bot, update):
-    print("Executing interpreter")
-    msg = "Enquesta " + idEnquesta + ":"
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    print("Mensaje enviado")
-
-    for n in graph:
-        print("Node=" + n)
-        if (str(n) == idEnquesta):
-            root = n
-            print("Arrel=" + root)
-    print("Arrel2=" + root)
-    neighbors = graph.neighbors(root)
-    for x in neighbors:
-        actualNode = x
-    print("Primera pregunta: " + actualNode)
-    end = False
-    nodesToProcess = []
-    while not end:
-        txtPreguntas = nx.get_node_attributes(graph, 'pregunta')
-        msg = idEnquesta + "> " + txtPreguntas[actualNode]
-        print("**** " + msg)
-        successors = graph.neighbors(actualNode)
-
-        answers = []
-        alternatives = []
-
-        for v in successors:
-            if (graph[actualNode][v]['color'] == 'black'):
-                print("Encontrada arista negra hacia '" + v + "'")
-                nodesToProcess.append(v)
-            elif (graph[actualNode][v]['color'] == 'blue'):
-                print("Encontrada arista azul hacia '" + v + "'")
-                answers.append(v)
-            else:
-                print("Encontrada arista verde hacia '" + v + "'")
-                alternatives.append(v)
-
-        for answer in answers:
-            # Tratar respuesta y esperar resultado
-            print("Respuesta: " + answer)
-            txtRespuestas = nx.get_node_attributes(graph, 'resposta')
-            msg = msg + txtRespuestas[answer]
-            print("/////////////////////////////")
-            print(txtRespuestas)
-            for x in txtRespuestas:
-                print(txtRespuestas[x])
-            print("/////////////////////////////")
-            print("**** " + msg)
-            #bot.send_message(chat_id=update.message.chat_id, text=msg)
-            questionAndAnswer = []
-            questionAndAnswer.append(0)
-            questionAndAnswer.append(msg)
-            questionAndAnswer.append(0)
-            questionAndAnswer.append(0)
-            queueOfQuestionAnswer.append(questionAndAnswer)
-
-        for alter in alternatives:
-            # Si el resultado de la respuesta es la etiqueta 
-            # de la arista de 'alter', anyade a nodos a procesar
-            print("Alternativo: " + alter)
-            txtRespuestas = nx.get_node_attributes(graph, 'resposta')
-            msg = msg + txtRespuestas[alter]
-            print(msg)
-            labels = nx.get_edge_attributes(graph, 'label')
-            optionValue = str(labels[(idEnquesta,alter)])
-            print("Option value=" + optionValue)
-            questionAndAnswer = []
-            questionAndAnswer.append(1)
-            questionAndAnswer.append(msg)
-            questionAndAnswer.append(optionValue)
-            questionAndAnswer.append(idEnquesta)
-            queueOfQuestionAnswer.append(questionAndAnswer)
-
-        print("Comprobando nodos a procesar")
-        if nodesToProcess:
-            print("Existen nodos a procesar")
-            actualNode = nodesToProcess[len(nodesToProcess)-1]
-            print(actualNode)
-            nodesToProcess.pop()
-        else:
-            print("End")
-            end = True
-            for l in queueOfQuestionAnswer:
-                print("Element:")
-                print(l[0])
-                print(l[1])
-                print(l[2])
-                print(l[3])
-
 def processAnswer(bot, update, user_data):
     if (('isAnswering' in user_data) and (user_data['isAnswering'] == True)):
         print("Processing answer")
@@ -261,6 +171,9 @@ def processAnswer(bot, update, user_data):
         print(actualNode)
 
         if (actualNode == 'END'):
+            for x in user_data['respostes']:
+                print(x)
+                print(user_data['respostes'][x])
             msg = user_data['enquesta'] + "> Gracies pel teu temps!"
             bot.send_message(chat_id=update.message.chat_id, text=msg)
         else:
