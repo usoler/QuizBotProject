@@ -1,7 +1,7 @@
 import networkx as nx
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-
-queueOfQuestionAnswer = []
+from Resposta import Resposta
+from RespostesEnquesta import RespostesEnquesta
 
 def start(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="Conversa iniciada")
@@ -37,9 +37,8 @@ def quiz(bot, update, user_data):
         bot.send_message(chat_id=update.message.chat_id, text=msg)
 
     ## mover a bloque try
-    #executeInterpreter(idEnquesta, graph, bot, update)
-    initInterpreter("E", graph, bot, update, user_data)
-    #executeInterpreter("E", graph, bot, update) # HARDCODED
+    #initInterpreter(idEnquesta, graph, bot, update)
+    initInterpreter("E", graph, bot, update, user_data) # HARDCODED
     for x in user_data:
         print(x)
     print(user_data['isAnswering'])
@@ -100,7 +99,6 @@ def initInterpreter(idEnquesta, graph, bot, update, user_data):
             alternatives.append(v)
 
     for answer in answers:
-        # Tratar respuesta y esperar resultado
         print("Respuesta: " + answer)
         txtRespuestas = nx.get_node_attributes(graph, 'resposta')
         msg = msg + txtRespuestas[answer]
@@ -112,8 +110,6 @@ def initInterpreter(idEnquesta, graph, bot, update, user_data):
         print("**** " + msg)
 
     for alter in alternatives:
-        # Si el resultado de la respuesta es la etiqueta 
-        # de la arista de 'alter', anyade a nodos a procesar
         print("Alternativo: " + alter)
         txtRespuestas = nx.get_node_attributes(graph, 'resposta')
         msg = msg + txtRespuestas[alter]
@@ -132,7 +128,8 @@ def initInterpreter(idEnquesta, graph, bot, update, user_data):
     user_data['isAnswering'] = True
     user_data['lastNode'] = actualNode
     user_data['data'] = nodesToProcess
-    user_data['respostes'] = {}
+    #user_data['respostes'] = {}
+    user_data['respostes'] = RespostesEnquesta(idEnquesta)
     
     bot.send_message(chat_id=update.message.chat_id, text=msg)
 
@@ -145,10 +142,8 @@ def processAnswer(bot, update, user_data):
         # Tratar respuesta
         answer = update.message.text
         print("Answer = " + answer)
-        (user_data['respostes'])[user_data['lastNode']] = answer
-        for x in user_data['respostes']:
-            print(x)
-        print((user_data['respostes'])[user_data['lastNode']])
+
+        (user_data['respostes']).addResposta(str(user_data['lastNode']), answer)
 
         # Tratar siguiente nodo a procesar
         print("Processing next node")
@@ -171,9 +166,19 @@ def processAnswer(bot, update, user_data):
         print(actualNode)
 
         if (actualNode == 'END'):
-            for x in user_data['respostes']:
-                print(x)
-                print(user_data['respostes'][x])
+            dictionaryOfRespostes = (user_data['respostes']).getDictOfRespostes()
+            for x in dictionaryOfRespostes:
+                print("Pregunta '" + (dictionaryOfRespostes[x]).getIdPregunta() + "'")
+                dictionaryOfValues = (dictionaryOfRespostes[x]).getDictOfValues()
+                print("Garet")
+                for y in dictionaryOfValues:
+                    print("inside dict of values bucle")
+                    print("Valor: (down)")
+                    print(y)
+                    print("Comptats: (down)")
+                    print(dictionaryOfValues[y])
+
+            user_data['isAnswering'] = False
             msg = user_data['enquesta'] + "> Gracies pel teu temps!"
             bot.send_message(chat_id=update.message.chat_id, text=msg)
         else:
