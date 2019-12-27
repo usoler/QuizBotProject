@@ -1,3 +1,4 @@
+import pickle
 import networkx as nx
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from Resposta import Resposta
@@ -37,8 +38,7 @@ def quiz(bot, update, user_data):
         bot.send_message(chat_id=update.message.chat_id, text=msg)
 
     ## mover a bloque try
-    #initInterpreter(idEnquesta, graph, bot, update)
-    initInterpreter("E", graph, bot, update, user_data) # HARDCODED
+    initInterpreter(idEnquesta, graph, bot, update, user_data)
     for x in user_data:
         print(x)
     print(user_data['isAnswering'])
@@ -128,8 +128,16 @@ def initInterpreter(idEnquesta, graph, bot, update, user_data):
     user_data['isAnswering'] = True
     user_data['lastNode'] = actualNode
     user_data['data'] = nodesToProcess
-    #user_data['respostes'] = {}
-    user_data['respostes'] = RespostesEnquesta(idEnquesta)
+
+    print("Checking Respostes")
+    try:
+        print("Loading enquesta from Pickle")
+        file = open(idEnquesta + ".pickle", 'rb')
+        user_data['respostes'] = pickle.load(file)
+        file.close()
+    except:
+        print("Creating a new RespostesEnquesta")
+        user_data['respostes'] = RespostesEnquesta(idEnquesta)
     
     bot.send_message(chat_id=update.message.chat_id, text=msg)
 
@@ -178,6 +186,12 @@ def processAnswer(bot, update, user_data):
                     print("Comptats: (down)")
                     print(dictionaryOfValues[y])
 
+            print("Opening file")
+            file = open(user_data['enquesta'] + ".pickle", 'wb')
+            print("Dumping data with Pickle")
+            pickle.dump(user_data['respostes'], file, pickle.HIGHEST_PROTOCOL)
+            print("Closing file")
+            file.close()
             user_data['isAnswering'] = False
             msg = user_data['enquesta'] + "> Gracies pel teu temps!"
             bot.send_message(chat_id=update.message.chat_id, text=msg)

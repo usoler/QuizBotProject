@@ -10,6 +10,7 @@ else:
 # This class defines a complete generic visitor for a parse tree produced by EnquestesParser.
 class EnquestesVisitor(ParseTreeVisitor):
     myGraph = nx.DiGraph()
+    idEnquesta = ''
     actualNode = ''
     dictItems = {}
     dictAnswers = {}
@@ -34,7 +35,6 @@ class EnquestesVisitor(ParseTreeVisitor):
             print("Node=" + z)
             succs = EnquestesVisitor.myGraph.successors(z)
             for y in succs:
-                #print("Respuesta=" + txtRespuestas[str(y)])
                 print("Edge=" + y)
                 labels = nx.get_edge_attributes(EnquestesVisitor.myGraph, 'label')
                 print("Label=" + str(labels[(z,y)]))
@@ -43,7 +43,7 @@ class EnquestesVisitor(ParseTreeVisitor):
                 print("")
         for w in EnquestesVisitor.dictItems:
             print("Dict key=" + w + ", Dict value=" + EnquestesVisitor.dictItems[w])
-        nx.write_gpickle(EnquestesVisitor.myGraph, "graph.gpickle")
+        nx.write_gpickle(EnquestesVisitor.myGraph, EnquestesVisitor.idEnquesta + ".gpickle")
         edges = EnquestesVisitor.myGraph.edges()
         colors = [EnquestesVisitor.myGraph[u][v]['color'] for u,v in edges]
         labelDict = {}
@@ -148,6 +148,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         print("Visit Enquesta: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
+        EnquestesVisitor.idEnquesta = (l[0]).getText()
         for x in l:
             print("enquesta text=" + x.getText())
         EnquestesVisitor.myGraph.add_node((l[0]).getText())
