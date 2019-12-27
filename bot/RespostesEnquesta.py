@@ -29,3 +29,9 @@ class RespostesEnquesta:
             resposta = Resposta(idPregunta)
             resposta.addValue(valorResposta)
             self.dictOfRespostes[idPregunta] = resposta
+
+    def getEnquestaText(self):
+        msg = ''
+        for x in self.dictOfRespostes:
+            msg += (self.dictOfRespostes[x]).getRespostaText()
+        return msg

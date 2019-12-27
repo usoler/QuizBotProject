@@ -25,3 +25,9 @@ class Resposta:
         else:
             print("Initiating value to one")
             self.dictOfValues[valor] = 1
+
+    def getRespostaText(self):
+        msg = ''
+        for x in self.dictOfValues:
+            msg += "\n" + self.idPregunta + "    " + str(x) + "    " + str(self.dictOfValues[x])
+        return msg

@@ -1,5 +1,6 @@
 import pickle
 import networkx as nx
+from matplotlib import pyplot as plt
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from Resposta import Resposta
 from RespostesEnquesta import RespostesEnquesta
@@ -45,14 +46,58 @@ def quiz(bot, update, user_data):
     print(user_data['data'])
     print("All executed")
 
-def bar(bot, update):
+def bar(bot, update, user_data):
     idPregunta = update.message.text[5:]
+    try:
+        print("Loading enquesta from Pickle")
+        file = open(user_data['enquesta'] + ".pickle", 'rb')
+        enquestes = pickle.load(file)
+        file.close()
+        print("Enquesta loaded")
+        print("Getting resposta by id")
+        resposta = enquestes.getRespostaById(idPregunta)
+
+        values = []
+        numRespostes = []
+        print("Starting bucle")
+        for x in resposta.getDictOfValues():
+            values.append(x)
+            numRespostes.append((resposta.getDictOfValues())[x])
+        print("Bucle started")
+        print("Values:")
+        for x in values:
+            print(x)
+        print("Num Respostes:")
+        for x in numRespostes:
+            print(x)
+
+        print("Setting bar")
+        plt.bar(values, numRespostes)
+        print("Saving fig")
+        plt.savefig('bar.png')
+        print("Closing plt")
+        plt.close('all')
+        print("Sending photo")
+        bot.send_photo(chat_id=update.message.chat_id, photo=open('bar.png', 'rb'))
+
+    except:
+        print("No file")
 
 def pie(bot, update):
     idPregunta = update.message.text[5:]
 
-def report(bot, update):
-    report = 0
+def report(bot, update, user_data):
+    try:
+        print("Loading enquesta from Pickle")
+        file = open(user_data['enquesta'] + ".pickle", 'rb')
+        enquestes = pickle.load(file)
+        file.close()
+
+        msg = "pregunta   valor   respostes"
+        msg += enquestes.getEnquestaText()
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+    except:
+        print("No file with that idEnquesta")
 
 def findGraphById(id):
     print("Finding graph with id {" + id + "}")
@@ -258,9 +303,9 @@ dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('help', help))
 dispatcher.add_handler(CommandHandler('author', author))
 dispatcher.add_handler(CommandHandler('quiz', quiz, pass_user_data=True))
-dispatcher.add_handler(CommandHandler('bar', bar))
+dispatcher.add_handler(CommandHandler('bar', bar, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('pie', pie))
-dispatcher.add_handler(CommandHandler('report', report))
+dispatcher.add_handler(CommandHandler('report', report, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text, processAnswer, pass_user_data=True))
 
 updater.start_polling()
