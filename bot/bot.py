@@ -5,8 +5,10 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from Resposta import Resposta
 from RespostesEnquesta import RespostesEnquesta
 
+
 def start(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="Conversa iniciada")
+
 
 def help(bot, update):
     msg = "/start -- inicia la conversa con el bot\n"
@@ -18,10 +20,12 @@ def help(bot, update):
     msg += "/report -- muestra una tabla con el numero de respuestas obtenidas por cada valor de cada pregunta"
     bot.send_message(chat_id=update.message.chat_id, text=msg)
 
+
 def author(bot, update):
     msg = "Autor: Luis Oriol Soler Cruz\n"
     msg += "Correo: luis.oriol.soler@est.fib.upc.edu"
     bot.send_message(chat_id=update.message.chat_id, text=msg)
+
 
 def quiz(bot, update, user_data):
     idEnquesta = update.message.text[6:]
@@ -38,13 +42,14 @@ def quiz(bot, update, user_data):
         msg = "No se encuentra ninguna encuesta con id = '" + idEnquesta + "'"
         bot.send_message(chat_id=update.message.chat_id, text=msg)
 
-    ## mover a bloque try
+    # mover a bloque try
     initInterpreter(idEnquesta, graph, bot, update, user_data)
     for x in user_data:
         print(x)
     print(user_data['isAnswering'])
     print(user_data['data'])
     print("All executed")
+
 
 def bar(bot, update, user_data):
     idPregunta = update.message.text[5:]
@@ -83,8 +88,55 @@ def bar(bot, update, user_data):
     except:
         print("No file")
 
-def pie(bot, update):
+
+def pie(bot, update, user_data):
     idPregunta = update.message.text[5:]
+    try:
+        print("Loading enquesta from Pickle")
+        file = open(user_data['enquesta'] + ".pickle", 'rb')
+        enquestes = pickle.load(file)
+        file.close()
+        print("Enquesta loaded")
+        print("Getting resposta by id")
+        resposta = enquestes.getRespostaById(idPregunta)
+
+        values = []
+        comptats = []
+        percents = []
+        numRespostes = 0
+        explode = []
+        print("Starting bucle")
+        for x in resposta.getDictOfValues():
+            values.append(x)
+            numRespostes += int((resposta.getDictOfValues())[x])
+            comptats.append((resposta.getDictOfValues())[x])
+            explode.append(0.1)
+        print("Bucle started")
+        print("Values:")
+        for x in values:
+            print(x)
+        print("Num Respostes:")
+        for x in comptats:
+            print(x)
+        print("Parsing to percent")
+        for x in comptats:
+            percents.append((x / numRespostes) * 100)
+        print("Percents:")
+        for x in percents:
+            print(x)
+
+        print("Setting bar")
+        plt.pie(percents, explode=explode, labels=values, autopct='%1.1f%%', shadow=True, startangle=90)
+        print("Saving fig")
+        plt.savefig('pie.png')
+        print("Closing plt")
+        plt.close('all')
+        print("Sending photo")
+        bot.send_photo(chat_id=update.message.chat_id, photo=open('pie.png', 'rb'))
+
+    except:
+        print("No file")
+
 
 def report(bot, update, user_data):
     try:
@@ -99,9 +151,11 @@ def report(bot, update, user_data):
     except:
         print("No file with that idEnquesta")
 
+
 def findGraphById(id):
     print("Finding graph with id {" + id + "}")
     return nx.read_gpickle("../cl/" + id + ".gpickle")
+
 
 def initInterpreter(idEnquesta, graph, bot, update, user_data):
     print("Initiating interpreter")
@@ -160,7 +214,7 @@ def initInterpreter(idEnquesta, graph, bot, update, user_data):
         msg = msg + txtRespuestas[alter]
         print(msg)
         labels = nx.get_edge_attributes(graph, 'label')
-        optionValue = str(labels[(idEnquesta,alter)])
+        optionValue = str(labels[(idEnquesta, alter)])
         print("Option value=" + optionValue)
         greenNode = []
         greenNode.append(1)
@@ -183,11 +237,12 @@ def initInterpreter(idEnquesta, graph, bot, update, user_data):
     except:
         print("Creating a new RespostesEnquesta")
         user_data['respostes'] = RespostesEnquesta(idEnquesta)
-    
+
     bot.send_message(chat_id=update.message.chat_id, text=msg)
 
+
 def processAnswer(bot, update, user_data):
-    if (('isAnswering' in user_data) and (user_data['isAnswering'] == True)):
+    if (('isAnswering' in user_data) and (user_data['isAnswering'])):
         print("Processing answer")
         graph = user_data['graph']
         for x in graph:
@@ -277,15 +332,15 @@ def processAnswer(bot, update, user_data):
                 print("**** " + msg)
 
             for alter in alternatives:
-               print("Alternativo: " + alter)
-               labels = nx.get_edge_attributes(graph, 'label')
-               optionValue = str(labels[(actualNode,alter)])
-               print("Option value=" + optionValue)
-               greenNode = []
-               greenNode.append(1)
-               greenNode.append(alter)
-               greenNode.append(optionValue)
-               (user_data['data']).append(greenNode)
+                print("Alternativo: " + alter)
+                labels = nx.get_edge_attributes(graph, 'label')
+                optionValue = str(labels[(actualNode, alter)])
+                print("Option value=" + optionValue)
+                greenNode = []
+                greenNode.append(1)
+                greenNode.append(alter)
+                greenNode.append(optionValue)
+                (user_data['data']).append(greenNode)
 
             user_data['lastNode'] = actualNode
             print(user_data['lastNode'])
@@ -304,7 +359,7 @@ dispatcher.add_handler(CommandHandler('help', help))
 dispatcher.add_handler(CommandHandler('author', author))
 dispatcher.add_handler(CommandHandler('quiz', quiz, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('bar', bar, pass_user_data=True))
-dispatcher.add_handler(CommandHandler('pie', pie))
+dispatcher.add_handler(CommandHandler('pie', pie, pass_user_data=True))
 dispatcher.add_handler(CommandHandler('report', report, pass_user_data=True))
 dispatcher.add_handler(MessageHandler(Filters.text, processAnswer, pass_user_data=True))
 

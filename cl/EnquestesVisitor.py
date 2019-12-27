@@ -7,6 +7,7 @@ if __name__ is not None and "." in __name__:
 else:
     from EnquestesParser import EnquestesParser
 
+
 # This class defines a complete generic visitor for a parse tree produced by EnquestesParser.
 class EnquestesVisitor(ParseTreeVisitor):
     myGraph = nx.DiGraph()
@@ -16,9 +17,9 @@ class EnquestesVisitor(ParseTreeVisitor):
     dictAnswers = {}
 
     # Visit a parse tree produced by EnquestesParser#root.
-    def visitRoot(self, ctx:EnquestesParser.RootContext):
+    def visitRoot(self, ctx: EnquestesParser.RootContext):
         print("Visit Root: count=" + str(ctx.getChildCount()))
-        g = ctx.getChildren();
+        g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
         for x in l:
             print(" text=" + x.getText())
@@ -37,18 +38,18 @@ class EnquestesVisitor(ParseTreeVisitor):
             for y in succs:
                 print("Edge=" + y)
                 labels = nx.get_edge_attributes(EnquestesVisitor.myGraph, 'label')
-                print("Label=" + str(labels[(z,y)]))
+                print("Label=" + str(labels[(z, y)]))
                 colors = nx.get_edge_attributes(EnquestesVisitor.myGraph, 'color')
-                print("Color=" + str(colors[(z,y)]))
+                print("Color=" + str(colors[(z, y)]))
                 print("")
         for w in EnquestesVisitor.dictItems:
             print("Dict key=" + w + ", Dict value=" + EnquestesVisitor.dictItems[w])
         nx.write_gpickle(EnquestesVisitor.myGraph, EnquestesVisitor.idEnquesta + ".gpickle")
         edges = EnquestesVisitor.myGraph.edges()
-        colors = [EnquestesVisitor.myGraph[u][v]['color'] for u,v in edges]
+        colors = [EnquestesVisitor.myGraph[u][v]['color'] for u, v in edges]
         labelDict = {}
-        for u,v in edges:
-        	labelDict[(u,v)] = EnquestesVisitor.myGraph[u][v]['label']
+        for u, v in edges:
+        	labelDict[(u, v)] = EnquestesVisitor.myGraph[u][v]['label']
         nx.draw_circular(EnquestesVisitor.myGraph, edges=edges, edge_color=colors, with_labels=True, node_size=600, linewidths=2.0)
         nx.draw_networkx_edge_labels(EnquestesVisitor.myGraph, pos=nx.circular_layout(EnquestesVisitor.myGraph), edge_labels=labelDict)
         plt.draw()
@@ -56,14 +57,14 @@ class EnquestesVisitor(ParseTreeVisitor):
         plt.show()
 
     # Visit a parse tree produced by EnquestesParser#statement.
-    def visitStatement(self, ctx:EnquestesParser.StatementContext):
+    def visitStatement(self, ctx: EnquestesParser.StatementContext):
         print("Visit Statement: count=" + str(ctx.getChildCount()))
         n = next(ctx.getChildren())
         print("statement text=" + n.getText())
         self.visitChildren(ctx)
 
     # Visit a parse tree produced by EnquestesParser#pregunta.
-    def visitPregunta(self, ctx:EnquestesParser.PreguntaContext):
+    def visitPregunta(self, ctx: EnquestesParser.PreguntaContext):
         print("Visit Pregunta: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
@@ -73,7 +74,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         self.visit(l[5])
 
     # Visit a parse tree produced by EnquestesParser#phrase.
-    def visitPhrase(self, ctx:EnquestesParser.PhraseContext):
+    def visitPhrase(self, ctx: EnquestesParser.PhraseContext):
         print("Visit Phrase: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
@@ -81,7 +82,7 @@ class EnquestesVisitor(ParseTreeVisitor):
             print("Phrase text word=" + x.getText())
 
     # Visit a parse tree produced by EnquestesParser#resposta.
-    def visitResposta(self, ctx:EnquestesParser.RespostaContext):
+    def visitResposta(self, ctx: EnquestesParser.RespostaContext):
         print("Visit Resposta: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
@@ -96,7 +97,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         print("options=" + values[(l[0]).getText()])
 
     # Visit a parse tree produced by EnquestesParser#option.
-    def visitOption(self, ctx:EnquestesParser.OptionContext):
+    def visitOption(self, ctx: EnquestesParser.OptionContext):
         print("Visit Option: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
@@ -104,7 +105,7 @@ class EnquestesVisitor(ParseTreeVisitor):
             print("Option text word=" + x.getText())
         optionWord = ''
         for j in range(ctx.getChildCount()-2):
-        	optionWord = optionWord + l[j].getText()
+            optionWord = optionWord + l[j].getText()
         print("OPTION WORD=" + optionWord)
         values = nx.get_node_attributes(EnquestesVisitor.myGraph, 'resposta')
         print("Val=" + values[EnquestesVisitor.actualNode])
@@ -114,7 +115,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         print("**************" + EnquestesVisitor.myGraph.graph[EnquestesVisitor.actualNode])
 
     # Visit a parse tree produced by EnquestesParser#item.
-    def visitItem(self, ctx:EnquestesParser.ItemContext):
+    def visitItem(self, ctx: EnquestesParser.ItemContext):
         print("Visit Item: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
@@ -124,7 +125,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         EnquestesVisitor.dictItems[(l[0]).getText()] = (l[5]).getText()
 
     # Visit a parse tree produced by EnquestesParser#alternativa.
-    def visitAlternativa(self, ctx:EnquestesParser.AlternativaContext):
+    def visitAlternativa(self, ctx: EnquestesParser.AlternativaContext):
         print("Visit Alternativa: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
@@ -135,7 +136,7 @@ class EnquestesVisitor(ParseTreeVisitor):
             self.visit(l[y])
 
     # Visit a parse tree produced by EnquestesParser#detour.
-    def visitDetour(self, ctx:EnquestesParser.DetourContext):
+    def visitDetour(self, ctx: EnquestesParser.DetourContext):
         print("Visit Detour: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]
@@ -144,7 +145,7 @@ class EnquestesVisitor(ParseTreeVisitor):
         EnquestesVisitor.myGraph.add_edge(EnquestesVisitor.actualNode, EnquestesVisitor.dictItems[(l[3]).getText()], label=str(l[1]), color='green')
 
     # Visit a parse tree produced by EnquestesParser#enquesta.
-    def visitEnquesta(self, ctx:EnquestesParser.EnquestaContext):
+    def visitEnquesta(self, ctx: EnquestesParser.EnquestaContext):
         print("Visit Enquesta: count=" + str(ctx.getChildCount()))
         g = ctx.getChildren()
         l = [next(g) for i in range(ctx.getChildCount())]

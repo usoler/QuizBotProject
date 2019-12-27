@@ -5,10 +5,11 @@ from EnquestesParser import EnquestesParser
 from antlr4.InputStream import InputStream
 from EnquestesVisitor import EnquestesVisitor
 
+
 if len(sys.argv) > 1:
-	input_stream = FileStream(sys.argv[1])
+    input_stream = FileStream(sys.argv[1])
 else:
-	input_stream = InputStream(input('? '))
+    input_stream = InputStream(input('? '))
 
 lexer = EnquestesLexer(input_stream)
 token_stream = CommonTokenStream(lexer)

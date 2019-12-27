@@ -1,5 +1,6 @@
 from Resposta import Resposta
 
+
 class RespostesEnquesta:
 
     def __init__(self, id):
