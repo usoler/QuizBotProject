@@ -7,7 +7,7 @@ from EnquestesVisitor import EnquestesVisitor
 
 
 if len(sys.argv) > 1:
-    input_stream = FileStream(sys.argv[1])
+    input_stream = FileStream(sys.argv[1], encoding='utf-8')
 else:
     input_stream = InputStream(input('? '))
 
