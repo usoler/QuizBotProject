@@ -37,3 +37,6 @@ $ python3 test.main.py enquesta.txt
 ## Author
 
 * **Oriol Soler** - *GEI-LP Project* - [usoler](https://github.com/usoler)
+
+## Score: 8.5
+
